@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProductById } from '@/lib/supabase/queries';
-import { getAllProductIdsStatic } from '@/lib/supabase/queries-static';
+import { getProductByIdFast, getAllProductIdsStatic } from '@/lib/supabase/queries-static';
 import { generateProductMetadata, generateEnhancedProductStructuredData, generateProductFAQStructuredData, generateBreadcrumbStructuredData } from '@/lib/seo';
 import { ProductDetailClient } from './product-detail-client';
 
@@ -28,7 +27,7 @@ export async function generateStaticParams() {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
   const { id } = await params;
-  const product = await getProductById(id);
+  const product = await getProductByIdFast(id);
   
   if (!product) {
     return {
@@ -42,7 +41,7 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = await params;
-  const product = await getProductById(id);
+  const product = await getProductByIdFast(id);
   
   if (!product) {
     notFound();

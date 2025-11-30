@@ -24,8 +24,31 @@ export function ProductDetailClient({ product, reviews }: ProductDetailClientPro
   const [isAdded, setIsAdded] = useState(false);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
+  const [specifications, setSpecifications] = useState<any[]>([]);
+  const [features, setFeatures] = useState<any[]>([]);
+  const [loadingSpecs, setLoadingSpecs] = useState(true);
   const { addItem } = useCart();
   const { toast } = useToast();
+
+  // Load specifications and features dynamically
+  useEffect(() => {
+    const loadSpecs = async () => {
+      try {
+        const response = await fetch(`/api/products/specs?productId=${product.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSpecifications(data.specifications || []);
+          setFeatures(data.features || []);
+        }
+      } catch (error) {
+        console.error('Error loading specifications:', error);
+      } finally {
+        setLoadingSpecs(false);
+      }
+    };
+
+    loadSpecs();
+  }, [product.id]);
 
   // Load similar products dynamically after page load
   useEffect(() => {
@@ -144,14 +167,33 @@ export function ProductDetailClient({ product, reviews }: ProductDetailClientPro
             {/* Specifications */}
             <div className="border-t border-border pt-6">
               <h2 className="text-base font-semibold text-foreground mb-4">Specifications</h2>
-              <ul className="space-y-3">
-                {(product.specs || []).map((spec, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-text-secondary">{spec}</span>
-                  </li>
-                ))}
-              </ul>
+              {loadingSpecs ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse flex items-start gap-3">
+                      <div className="h-5 w-5 bg-surface rounded flex-shrink-0" />
+                      <div className="h-4 bg-surface rounded w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {specifications.map((spec) => (
+                    <li key={spec.id} className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-text-secondary">
+                        <strong>{spec.name}:</strong> {spec.value}
+                      </span>
+                    </li>
+                  ))}
+                  {features.map((feature) => (
+                    <li key={feature.id} className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-text-secondary">{feature.description}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Add to Cart */}
