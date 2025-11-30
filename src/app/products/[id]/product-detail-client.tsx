@@ -119,17 +119,19 @@ export function ProductDetailClient({ product, reviews }: ProductDetailClientPro
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Product Image */}
-          <div className="bg-surface rounded-xl p-8 border border-border">
-            <div className="relative aspect-square">
-              <Image 
-                src={product.images[0]?.url || '/placeholder.svg'} 
-                alt={product.images[0]?.alt || product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-contain"
-                priority
-              />
+          {/* Product Image - Sticky on large screens */}
+          <div className="lg:sticky lg:top-24 self-start">
+            <div className="bg-surface rounded-xl p-8 border border-border">
+              <div className="relative aspect-square">
+                <Image 
+                  src={product.images[0]?.url || '/placeholder.svg'} 
+                  alt={product.images[0]?.alt || product.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
           </div>
 
