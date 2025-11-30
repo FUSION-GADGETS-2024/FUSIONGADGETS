@@ -1,0 +1,58 @@
+{
+  "total": 75,
+  "byCategory": {
+    "Smartwatch": 17,
+    "Home & Kitchen": 13,
+    "In-Ear Headphones": 11,
+    "Car Accessories": 6,
+    "Water Bottles": 5,
+    "Mobile Charger": 3,
+    "Bluetooth Speakers": 3,
+    "Charging cables": 3,
+    "Beard & Mustache Trimmers": 2,
+    "Flashlights": 2,
+    "Car Charger": 1,
+    "Night Lamps": 1,
+    "Toys & Games": 1,
+    "Hair Dryers": 1,
+    "PowerBanks": 1,
+    "Gas Lighter": 1,
+    "Electric Fan Heaters": 1,
+    "Portable Fans": 1,
+    "Mobile Accessories": 1,
+    "Juicer Mixer Grinders": 1
+  },
+  "byBrand": {
+    "Generic": 52,
+    "HIWATCH": 3,
+    "EXIDE": 3,
+    "FIRE BOLTT": 2,
+    "MI": 2,
+    "Havells": 2,
+    "LDNIO": 1,
+    "SURYA": 1,
+    "VEGA": 1,
+    "HTC": 1,
+    "Wearfit": 1,
+    "Hello": 1,
+    "Lyne": 1,
+    "Havells ": 1,
+    "Nice": 1,
+    "Realme": 1,
+    "Crompton": 1
+  },
+  "byStatus": {
+    "Active": 75
+  },
+  "pricing": {
+    "min": 25,
+    "max": 14699,
+    "average": "1260.81"
+  },
+  "featured": 12,
+  "advertised": 14,
+  "withDiscount": 74,
+  "outOfStock": 9,
+  "averageRating": "5.00",
+  "totalReviews": 0
+}
