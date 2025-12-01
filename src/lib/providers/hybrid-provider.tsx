@@ -29,11 +29,11 @@ export function useCart() {
       return {
         state: { items: [], total: 0, count: 0 },
         isLoading: true,
-        addItem: () => {},
-        removeItem: () => {},
-        updateQuantity: () => {},
-        clearCart: () => {},
-        refreshCart: () => {},
+        addItem: async () => {},
+        removeItem: async () => {},
+        updateQuantity: async () => {},
+        clearCart: async () => {},
+        refreshCart: async () => {},
       } as ReturnType<typeof useCartHybrid>;
     }
     throw new Error('useCart must be used within HybridProvider');
@@ -48,11 +48,11 @@ export function useWishlist() {
       return {
         items: [],
         isLoading: true,
-        addToWishlist: () => {},
-        removeFromWishlist: () => {},
+        addToWishlist: async () => {},
+        removeFromWishlist: async () => {},
         isInWishlist: () => false,
-        toggleWishlist: () => false,
-        refreshWishlist: () => {},
+        toggleWishlist: async () => false,
+        refreshWishlist: async () => {},
       } as ReturnType<typeof useWishlistHybrid>;
     }
     throw new Error('useWishlist must be used within HybridProvider');
