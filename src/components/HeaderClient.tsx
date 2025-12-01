@@ -28,15 +28,15 @@ interface HeaderClientProps {
 
 export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: HeaderClientProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
+  const [mounted, setMounted] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
   const { state: cartState } = useCart();
   const { searchQuery, setSearchQuery } = useSearch();
+  const { user, signOut } = useAuth();
   
   // Use cart context count if available, otherwise use prop
   const cartCount = propCartCount !== undefined ? propCartCount : cartState.count;
@@ -44,6 +44,14 @@ export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: Heade
   const isHomePage = pathname === "/";
   const isProductsPage = pathname === "/products";
   const isCategoriesPage = pathname === "/categories";
+
+  // Derived state from auth context
+  const isLoggedIn = !!user;
+  const userName = user?.user_metadata?.name || user?.email || null;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,15 +62,6 @@ export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: Heade
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Use auth context instead of local state
-  const { user } = useAuth();
-  
-  useEffect(() => {
-    // Update local state based on auth context
-    setIsLoggedIn(!!user);
-    setUserName(user?.user_metadata?.name || user?.email || null);
-  }, [user, pathname]);
 
   useEffect(() => {
     // Load products for search functionality
@@ -104,12 +103,8 @@ export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: Heade
     onSearchChange?.(query);
   };
 
-  const { signOut } = useAuth();
-  
   const handleLogout = async () => {
     await signOut();
-    setIsLoggedIn(false);
-    setUserName(null);
     router.push("/");
   };
 
@@ -208,7 +203,11 @@ export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: Heade
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-background/80 backdrop-blur-xl border-border/50 z-50">
-              {isLoggedIn ? (
+              {!mounted ? (
+                <DropdownMenuItem disabled>
+                  <span className="font-medium">Loading...</span>
+                </DropdownMenuItem>
+              ) : isLoggedIn ? (
                 <>
                   {userName && (
                     <DropdownMenuItem disabled>
@@ -226,7 +225,10 @@ export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: Heade
                     <Link href="/wishlist" className="cursor-pointer">Wishlist</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                  <DropdownMenuItem 
+                    onClick={handleLogout} 
+                    className="cursor-pointer text-destructive focus:bg-destructive focus:text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
+                  >
                     Logout
                   </DropdownMenuItem>
                 </>

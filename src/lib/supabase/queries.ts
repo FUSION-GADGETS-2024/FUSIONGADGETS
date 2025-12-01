@@ -341,6 +341,111 @@ export async function getAllBrands() {
   return data;
 }
 
+// Get filtered products with pagination (for SSR products page)
+export async function getFilteredProducts(
+  filters: {
+    category?: string;
+    brand?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: 'name' | 'price' | 'rating' | 'newest' | 'discount';
+    sortOrder?: 'asc' | 'desc';
+    search?: string;
+  },
+  page: number = 1,
+  limit: number = 12
+): Promise<{ products: Product[]; total: number; totalPages: number }> {
+  const supabase = await createServerClient();
+  
+  let query = supabase
+    .from('products')
+    .select(`
+      *,
+      categories(name, slug),
+      brands(name),
+      product_images(*),
+      product_specifications(*),
+      product_features(*)
+    `, { count: 'exact' })
+    .eq('status', 'Active');
+
+  // Apply category filter
+  if (filters.category) {
+    query = query.eq('categories.name', filters.category);
+  }
+
+  // Apply brand filter
+  if (filters.brand) {
+    query = query.eq('brands.name', filters.brand);
+  }
+
+  // Apply price range filters
+  if (filters.minPrice !== undefined) {
+    query = query.gte('price', filters.minPrice);
+  }
+  if (filters.maxPrice !== undefined) {
+    query = query.lte('price', filters.maxPrice);
+  }
+
+  // Apply search filter
+  if (filters.search) {
+    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+  }
+
+  // Apply sorting
+  const sortOrder = filters.sortOrder === 'asc';
+  switch (filters.sortBy) {
+    case 'name':
+      query = query.order('name', { ascending: true });
+      break;
+    case 'price':
+      query = query.order('price', { ascending: sortOrder });
+      break;
+    case 'rating':
+      query = query.order('rating', { ascending: false });
+      break;
+    case 'discount':
+      query = query.order('discount', { ascending: false });
+      break;
+    case 'newest':
+    default:
+      query = query.order('created_at', { ascending: false });
+      break;
+  }
+
+  // Apply pagination
+  const offset = (page - 1) * limit;
+  query = query.range(offset, offset + limit - 1);
+
+  const { data: products, error, count } = await query;
+
+  if (error) {
+    console.error('Error fetching filtered products:', error);
+    return { products: [], total: 0, totalPages: 0 };
+  }
+
+  // Filter out products that don't match category/brand (due to join behavior)
+  const filteredProducts = products?.filter(product => {
+    if (filters.category && product.categories?.name !== filters.category) return false;
+    if (filters.brand && product.brands?.name !== filters.brand) return false;
+    return true;
+  }) || [];
+
+  const transformedProducts = filteredProducts.map(product => 
+    transformProduct(
+      product,
+      product.product_images || [],
+      product.product_specifications || [],
+      product.product_features || []
+    )
+  );
+
+  const total = count || 0;
+  const totalPages = Math.ceil(total / limit);
+
+  return { products: transformedProducts, total, totalPages };
+}
+
 // Get similar products (same category, excluding current product)
 export async function getSimilarProducts(productId: string, categoryId: string | null, limit: number = 3): Promise<Product[]> {
   if (!categoryId) return [];

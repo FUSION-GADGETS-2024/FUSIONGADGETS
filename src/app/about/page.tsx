@@ -1,126 +1,113 @@
+import { Metadata } from 'next';
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Shield, Truck, Award, Users } from "lucide-react";
-import { Metadata } from "next";
-import { generateBreadcrumbStructuredData, generateOrganizationStructuredData, generateLocalBusinessStructuredData } from "@/lib/seo";
+import { generateBreadcrumbStructuredData } from '@/lib/seo';
 
-// SEO metadata for About page
+// Pure SSG - No hydration needed
 export const metadata: Metadata = {
-  title: "About Premium Tech - Our Story & Values",
-  description: "Learn about Premium Tech's mission to provide professionals with the highest quality technology products. Founded in 2020, we serve thousands of professionals worldwide.",
-  keywords: ["about premium tech", "company story", "technology experts", "professional tools", "quality products"],
-  alternates: {
-    canonical: "/about",
-  },
+  title: 'About Us | Fusion Gadgets',
+  description: 'Learn about Fusion Gadgets - your trusted destination for premium technology products. Discover our story, mission, and commitment to quality.',
+  keywords: ['about fusion gadgets', 'tech store', 'premium gadgets', 'our story'],
   openGraph: {
-    title: "About Premium Tech - Our Story & Values",
-    description: "Learn about Premium Tech's mission to provide professionals with the highest quality technology products.",
-    url: "/about",
-    type: "website",
+    title: 'About Us | Fusion Gadgets',
+    description: 'Learn about Fusion Gadgets - your trusted destination for premium technology products.',
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "About Premium Tech - Our Story & Values",
-    description: "Learn about Premium Tech's mission to provide professionals with the highest quality technology products.",
+  alternates: {
+    canonical: '/about',
   },
 };
 
 export default function AboutPage() {
-  // Generate structured data
   const breadcrumbStructuredData = generateBreadcrumbStructuredData([
     { name: 'Home', url: '/' },
-    { name: 'About', url: '/about' },
+    { name: 'About Us', url: '/about' },
   ]);
 
-  const organizationStructuredData = generateOrganizationStructuredData();
-  const localBusinessStructuredData = generateLocalBusinessStructuredData();
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Structured Data */}
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbStructuredData),
         }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationStructuredData),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(localBusinessStructuredData),
-        }}
-      />
       
-      <Header isStatic={true} />
-      
-      <main className="container mx-auto px-8 pt-24 pb-24">
-        {/* Hero Section */}
-        <div className="text-center mb-24">
-          <h1 className="text-3xl font-semibold text-foreground mb-4 tracking-tight">About Premium Tech</h1>
-          <p className="text-lg text-text-secondary max-w-3xl mx-auto">
-            We believe in providing professionals with the highest quality technology products that enhance productivity and inspire excellence.
-          </p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <Header isStatic />
+        
+        <main className="container mx-auto px-8 pt-24 pb-24">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl font-semibold text-foreground mb-8">About Fusion Gadgets</h1>
+            
+            <div className="prose prose-neutral max-w-none">
+              <section className="mb-12">
+                <h2 className="text-xl font-semibold text-foreground mb-4">Our Story</h2>
+                <p className="text-text-secondary leading-relaxed mb-4">
+                  Founded with a passion for technology and innovation, Fusion Gadgets has grown to become 
+                  one of India's most trusted destinations for premium tech products. We believe that 
+                  everyone deserves access to cutting-edge technology that enhances their daily lives.
+                </p>
+                <p className="text-text-secondary leading-relaxed">
+                  Our journey began with a simple mission: to curate the finest selection of gadgets 
+                  and deliver them with exceptional service. Today, we continue to uphold these values 
+                  while expanding our offerings to meet the evolving needs of tech enthusiasts.
+                </p>
+              </section>
 
-        {/* Values Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
-          <div className="text-center">
-            <div className="h-12 w-12 rounded-xl bg-surface border border-border flex items-center justify-center mx-auto mb-4">
-              <Award className="h-6 w-6 text-foreground" />
+              <section className="mb-12">
+                <h2 className="text-xl font-semibold text-foreground mb-4">Our Mission</h2>
+                <p className="text-text-secondary leading-relaxed">
+                  To provide our customers with premium technology products that combine innovation, 
+                  quality, and value. We strive to make the latest gadgets accessible while ensuring 
+                  an exceptional shopping experience from browsing to delivery.
+                </p>
+              </section>
+
+              <section className="mb-12">
+                <h2 className="text-xl font-semibold text-foreground mb-4">Why Choose Us</h2>
+                <ul className="space-y-3 text-text-secondary">
+                  <li className="flex items-start gap-3">
+                    <span className="text-success font-bold">✓</span>
+                    <span>Authentic products with manufacturer warranty</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-success font-bold">✓</span>
+                    <span>Free shipping on all orders</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-success font-bold">✓</span>
+                    <span>30-day hassle-free returns</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-success font-bold">✓</span>
+                    <span>Dedicated customer support</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-success font-bold">✓</span>
+                    <span>Secure payment options</span>
+                  </li>
+                </ul>
+              </section>
+
+              <section>
+                <h2 className="text-xl font-semibold text-foreground mb-4">Contact Us</h2>
+                <p className="text-text-secondary leading-relaxed">
+                  Have questions or need assistance? Our team is here to help. Reach out to us at{' '}
+                  <a href="mailto:support@fusiongadgets.com" className="text-foreground hover:underline">
+                    support@fusiongadgets.com
+                  </a>{' '}
+                  or call us at{' '}
+                  <a href="tel:+911234567890" className="text-foreground hover:underline">
+                    +91 123 456 7890
+                  </a>
+                </p>
+              </section>
             </div>
-            <h3 className="text-base font-semibold text-foreground mb-2">Premium Quality</h3>
-            <p className="text-sm text-text-secondary">Only the finest products from trusted brands</p>
           </div>
+        </main>
 
-          <div className="text-center">
-            <div className="h-12 w-12 rounded-xl bg-surface border border-border flex items-center justify-center mx-auto mb-4">
-              <Shield className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-base font-semibold text-foreground mb-2">2-Year Warranty</h3>
-            <p className="text-sm text-text-secondary">Comprehensive coverage on all products</p>
-          </div>
-
-          <div className="text-center">
-            <div className="h-12 w-12 rounded-xl bg-surface border border-border flex items-center justify-center mx-auto mb-4">
-              <Truck className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-base font-semibold text-foreground mb-2">Free Shipping</h3>
-            <p className="text-sm text-text-secondary">Fast, reliable delivery worldwide</p>
-          </div>
-
-          <div className="text-center">
-            <div className="h-12 w-12 rounded-xl bg-surface border border-border flex items-center justify-center mx-auto mb-4">
-              <Users className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-base font-semibold text-foreground mb-2">Expert Support</h3>
-            <p className="text-sm text-text-secondary">Dedicated team ready to assist</p>
-          </div>
-        </div>
-
-        {/* Story Section */}
-        <div className="bg-surface border border-border rounded-xl p-12 max-w-4xl mx-auto">
-          <h2 className="text-xl font-semibold text-foreground mb-6">Our Story</h2>
-          <div className="space-y-4 text-sm text-text-secondary leading-relaxed">
-            <p>
-              Founded in 2020, Premium Tech was born from a simple belief: professionals deserve technology that matches their ambition. We saw a market flooded with products, but lacking in genuine quality and thoughtful curation.
-            </p>
-            <p>
-              Our team of technology experts carefully evaluates every product we offer, ensuring it meets our rigorous standards for performance, design, and reliability. We partner directly with leading manufacturers to bring you the latest innovations at competitive prices.
-            </p>
-            <p>
-              Today, we serve thousands of professionals worldwide who trust us to deliver the tools they need to excel in their work. From creative studios to corporate offices, our products power the world's most ambitious projects.
-            </p>
-          </div>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }

@@ -1,74 +1,69 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getProfile, updateProfile } from '@/lib/services/profile-service';
+import { updateProfileSchema } from '@/lib/validations/profile-schema';
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    const profile = await getProfile(user.id);
 
-    if (profileError && profileError.code !== 'PGRST116') {
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
+    if (!profile) {
+      return NextResponse.json(
+        { success: false, error: 'Profile not found' },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ user, profile }, { status: 200 });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: profile });
+  } catch (error: any) {
+    console.error('Error fetching profile:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { success: false, error: error.message || 'Failed to fetch profile' },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
-    const { name, phone, avatar } = body;
+    const validated = updateProfileSchema.parse(body);
 
-    // Update profile
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        email: user.email,
-        name,
-        phone,
-        avatar,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+    const profile = await updateProfile(user.id, validated);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, data: profile });
+  } catch (error: any) {
+    console.error('Error updating profile:', error);
+
+    if (error.name === 'ZodError') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid request data', details: error.errors },
+        { status: 400 }
+      );
     }
 
-    // Update auth user metadata
-    await supabase.auth.updateUser({
-      data: { name }
-    });
-
-    return NextResponse.json({ data }, { status: 200 });
-  } catch (error) {
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { success: false, error: error.message || 'Failed to update profile' },
       { status: 500 }
     );
   }

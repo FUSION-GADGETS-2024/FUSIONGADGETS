@@ -50,6 +50,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
     });
+
+    // Merge guest cart on successful login
+    if (!error) {
+      try {
+        await fetch('/api/cart/merge', { method: 'POST' });
+      } catch (mergeError) {
+        console.error('Failed to merge cart:', mergeError);
+      }
+    }
+
     return { error };
   };
 

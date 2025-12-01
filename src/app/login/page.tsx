@@ -81,7 +81,7 @@ function LoginForm() {
         </form>
         <div className="mt-4 text-center text-sm">
           Don't have an account?{" "}
-          <Link href="/signup" className="text-accent hover:underline">
+          <Link href="/signup" className="text-foreground font-semibold hover:underline">
             Sign up
           </Link>
         </div>

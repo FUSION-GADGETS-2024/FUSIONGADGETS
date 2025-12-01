@@ -1,10 +1,13 @@
 import { Metadata } from 'next';
-import { CategoriesClient } from './categories-client';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { getAllCategories } from '@/lib/supabase/queries';
 import { generateBreadcrumbStructuredData, generateWebsiteStructuredData } from '@/lib/seo';
 
-// Enable ISR - revalidate every hour
-export const revalidate = 3600;
+// ISR - Revalidate every 10 minutes
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: 'Categories - Shop by Category | Fusion Gadgets',
@@ -38,13 +41,7 @@ export default async function CategoriesPage() {
     slug: cat.slug,
     description: cat.description || '',
     image: cat.image || 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800&h=600&fit=crop',
-    productCount: cat.product_count,
-    seo: {
-      title: `${cat.name} - Fusion Gadgets`,
-      description: cat.description || `Shop ${cat.name} products`,
-      keywords: [cat.name.toLowerCase()],
-    },
-    isActive: cat.is_active,
+    productCount: cat.product_count || 0,
   }));
 
   // Generate structured data
@@ -71,7 +68,69 @@ export default async function CategoriesPage() {
         }}
       />
       
-      <CategoriesClient categories={categories} />
+      <div className="min-h-screen bg-background">
+        <Header />
+        
+        {/* Hero Section */}
+        <div className="relative h-64 bg-gradient-to-r from-gray-900 to-gray-700 pt-14">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="container mx-auto px-8 h-full flex items-center relative z-10">
+            <div>
+              <h1 className="text-4xl font-semibold text-white mb-4">Shop by Category</h1>
+              <p className="text-lg text-white/80 max-w-xl">
+                Explore our curated collection of premium tech products organized by category
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <main className="container mx-auto px-8 py-16">
+          {/* Category Grid - Server Component */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {categories.map((category) => (
+              <Link 
+                key={category.id}
+                href={`/categories/${category.slug}`}
+                className="group"
+              >
+                <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-border-medium hover:shadow-lg">
+                  <div className="relative h-48 overflow-hidden">
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h2 className="text-xl font-semibold text-white mb-1">{category.name}</h2>
+                      <p className="text-sm text-white/80">
+                        {category.productCount} {category.productCount === 1 ? 'product' : 'products'}
+                      </p>
+                    </div>
+                  </div>
+                  {category.description && (
+                    <div className="p-4">
+                      <p className="text-sm text-text-secondary line-clamp-2">
+                        {category.description}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+          
+          {categories.length === 0 && (
+            <div className="text-center py-16">
+              <p className="text-text-secondary">No categories found</p>
+            </div>
+          )}
+        </main>
+
+        <Footer />
+      </div>
     </>
   );
 }

@@ -1,16 +1,22 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Footer } from "@/components/Footer";
 import { getAllProducts, getNewArrivals, getHotDeals, getFeaturedProducts } from "@/lib/supabase/queries";
 import { generateWebsiteStructuredData, generateOrganizationStructuredData, generateLocalBusinessStructuredData } from "@/lib/seo";
-import { HomepageClient } from "./homepage-client";
+import { Header } from "@/components/Header";
+import { Hero } from "@/components/Hero";
+import { ProductGrid } from "@/components/ProductGrid";
+import { ProductRowSkeleton } from "@/components/ProductRowSkeleton";
 
-// Generate metadata for homepage (SSG)
+// ISR - revalidate every 10 minutes as per architecture requirements
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: "Premium Technology. Professional Quality. | Fusion Gadgets",
   description: "Carefully curated collection of cutting-edge gadgets for professionals who demand excellence. Shop MacBook Pro, AirPods, Apple Watch, iPad Pro and more with fast shipping.",
   keywords: [
     "premium technology",
-    "professional gadgets", 
+    "professional gadgets",
     "macbook pro",
     "airpods",
     "apple watch",
@@ -38,17 +44,38 @@ export const metadata: Metadata = {
   },
 };
 
-// Enable ISR - revalidate every hour
-export const revalidate = 3600;
+// Server Component - Product Section
+async function ProductSection({ 
+  title, 
+  fetchFn, 
+  showViewAll = false 
+}: { 
+  title: string; 
+  fetchFn: () => Promise<any[]>;
+  showViewAll?: boolean;
+}) {
+  const products = await fetchFn();
+  
+  return (
+    <section className="mb-16">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
+        {showViewAll && (
+          <a 
+            href="/products" 
+            className="text-sm font-medium text-text-secondary hover:text-foreground transition-colors"
+          >
+            View All →
+          </a>
+        )}
+      </div>
+      <ProductGrid products={products} />
+    </section>
+  );
+}
 
-// Static generation with data from Supabase
+// Homepage - ISR with Server Components
 export default async function HomePage() {
-  // Get product data from Supabase at build time (SSG + ISR)
-  const allProducts = await getAllProducts();
-  const newArrivals = await getNewArrivals(3);
-  const hotDeals = await getHotDeals(3);
-  const featured = await getFeaturedProducts(3);
-
   // Generate comprehensive structured data for SEO
   const websiteStructuredData = generateWebsiteStructuredData();
   const organizationStructuredData = generateOrganizationStructuredData();
@@ -77,15 +104,48 @@ export default async function HomePage() {
       />
 
       <div className="min-h-screen bg-background">
-        {/* Client-side interactive components with Hero */}
-        <HomepageClient 
-          newArrivals={newArrivals}
-          hotDeals={hotDeals}
-          featured={featured}
-          allProducts={allProducts}
-        />
+        {/* Header with client-side cart/wishlist buttons */}
+        <Header />
         
-        {/* Footer is static */}
+        {/* Hero - Server Component */}
+        <Hero />
+        
+        <main className="container mx-auto px-8 pb-24">
+          {/* New Arrivals - Server Component with Suspense */}
+          <Suspense fallback={<ProductRowSkeleton title="New Arrivals" />}>
+            <ProductSection 
+              title="New Arrivals" 
+              fetchFn={() => getNewArrivals(4)} 
+            />
+          </Suspense>
+
+          {/* Hot Deals - Server Component with Suspense */}
+          <Suspense fallback={<ProductRowSkeleton title="Hot Deals" />}>
+            <ProductSection 
+              title="Hot Deals" 
+              fetchFn={() => getHotDeals(4)} 
+            />
+          </Suspense>
+
+          {/* Featured Products - Server Component with Suspense */}
+          <Suspense fallback={<ProductRowSkeleton title="Featured Products" />}>
+            <ProductSection 
+              title="Featured Products" 
+              fetchFn={() => getFeaturedProducts(4)} 
+            />
+          </Suspense>
+
+          {/* All Products - Server Component with Suspense */}
+          <Suspense fallback={<ProductRowSkeleton title="All Products" />}>
+            <ProductSection 
+              title="All Products" 
+              fetchFn={() => getAllProducts()} 
+              showViewAll={true}
+            />
+          </Suspense>
+        </main>
+
+        {/* Footer - Server Component */}
         <Footer />
       </div>
     </>
