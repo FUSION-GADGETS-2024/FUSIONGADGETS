@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Heart, Trash2, Star } from "lucide-react";
-import { useWishlist, useCart } from "@/lib/providers/hybrid-provider";
+import { useAuth } from "@/lib/auth/index";
 import { toast } from "sonner";
 
 interface ProductData {
@@ -26,7 +26,7 @@ function WishlistProductCard({ productId, onRemove }: { productId: string; onRem
   const [product, setProduct] = useState<ProductData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const { addItem } = useCart();
+  const { addToCart } = useAuth();
 
   useEffect(() => {
     async function fetchProduct() {
@@ -52,7 +52,7 @@ function WishlistProductCard({ productId, onRemove }: { productId: string; onRem
     if (!product || !product.inStock) return;
     
     setIsAddingToCart(true);
-    addItem({
+    addToCart({
       productId: product.id,
       name: product.name,
       price: product.price,
@@ -160,7 +160,9 @@ function WishlistProductCard({ productId, onRemove }: { productId: string; onRem
 }
 
 export default function WishlistPage() {
-  const { items, isLoading, removeFromWishlist } = useWishlist();
+  const { wishlist, loading, removeFromWishlist } = useAuth();
+  const items = wishlist;
+  const isLoading = loading;
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

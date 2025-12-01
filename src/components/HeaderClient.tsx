@@ -13,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { useAuth } from "@/lib/auth-context";
-import { useCart } from "@/lib/providers/hybrid-provider";
+import { useAuth } from "@/lib/auth/index";
 import { useSearch } from "@/lib/search-context";
 
 
@@ -34,12 +33,11 @@ export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: Heade
   const searchRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
-  const { state: cartState } = useCart();
   const { searchQuery, setSearchQuery } = useSearch();
-  const { user, signOut } = useAuth();
+  const { user, signOut, cartCount: authCartCount } = useAuth();
   
   // Use cart context count if available, otherwise use prop
-  const cartCount = propCartCount !== undefined ? propCartCount : cartState.count;
+  const cartCount = propCartCount !== undefined ? propCartCount : authCartCount;
   
   const isHomePage = pathname === "/";
   const isProductsPage = pathname === "/products";

@@ -4,12 +4,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { HybridProvider } from "@/lib/providers/hybrid-provider";
 import { SearchProvider } from "@/lib/search-context";
-import { AuthProvider } from "@/lib/auth-context";
+import { useAuth } from "@/lib/auth/index";
 import { useState, useEffect } from "react";
-import { initializePerformanceOptimizations } from "@/lib/performance";
-import { PerformanceMonitor } from "@/components/PerformanceMonitor";
+
+function AuthInitializer({ children }: { children: React.ReactNode }) {
+  const initialize = useAuth(state => state.initialize);
+  
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  return <>{children}</>;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -28,23 +35,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
     },
   }));
 
-  useEffect(() => {
-    initializePerformanceOptimizations();
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <HybridProvider>
-            <SearchProvider>
-              {children}
-              <Toaster />
-              <Sonner />
-              <PerformanceMonitor />
-            </SearchProvider>
-          </HybridProvider>
-        </AuthProvider>
+        <AuthInitializer>
+          <SearchProvider>
+            {children}
+            <Toaster />
+            <Sonner />
+          </SearchProvider>
+        </AuthInitializer>
       </TooltipProvider>
     </QueryClientProvider>
   );

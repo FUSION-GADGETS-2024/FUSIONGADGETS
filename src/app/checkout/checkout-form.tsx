@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useCart } from "@/lib/providers/hybrid-provider";
+import { useAuth } from "@/lib/auth/index";
 import { toast } from "sonner";
 
 export function CheckoutForm() {
-  const { state, isLoading, clearCart } = useCart();
+  const { cart, loading, clearCart } = useAuth();
+  const state = { items: cart, total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), count: cart.reduce((sum, item) => sum + item.quantity, 0) };
+  const isLoading = loading;
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 

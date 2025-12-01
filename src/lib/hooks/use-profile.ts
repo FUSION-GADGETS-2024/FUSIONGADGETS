@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth-context';
+import { createClient } from '../supabase/client';
 
 interface Profile {
     id: string;
@@ -9,14 +10,15 @@ interface Profile {
     name: string | null;
     avatar: string | null;
     phone: string | null;
+    user_code: string | null;
     theme: string;
     currency: string;
     language: string;
-    emailNotifications: boolean;
-    pushNotifications: boolean;
-    smsNotifications: boolean;
-    createdAt: string;
-    updatedAt: string;
+    email_notifications: boolean;
+    push_notifications: boolean;
+    sms_notifications: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
 interface UpdateProfileData {
@@ -26,9 +28,9 @@ interface UpdateProfileData {
     theme?: string;
     currency?: string;
     language?: string;
-    emailNotifications?: boolean;
-    pushNotifications?: boolean;
-    smsNotifications?: boolean;
+    email_notifications?: boolean;
+    push_notifications?: boolean;
+    sms_notifications?: boolean;
 }
 
 export function useProfile() {
@@ -37,12 +39,17 @@ export function useProfile() {
     return useQuery<Profile>({
         queryKey: ['profile', user?.id],
         queryFn: async () => {
-            const response = await fetch('/api/profile');
-            if (!response.ok) {
-                throw new Error('Failed to fetch profile');
-            }
-            const data = await response.json();
-            return data.data;
+            if (!user) throw new Error('No user');
+            
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (error) throw error;
+            return data;
         },
         enabled: !!user,
     });
@@ -54,18 +61,18 @@ export function useUpdateProfile() {
 
     return useMutation({
         mutationFn: async (updates: UpdateProfileData) => {
-            const response = await fetch('/api/profile', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updates),
-            });
+            if (!user) throw new Error('No user');
+            
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', user.id)
+                .select()
+                .single();
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to update profile');
-            }
-
-            return response.json();
+            if (error) throw error;
+            return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });

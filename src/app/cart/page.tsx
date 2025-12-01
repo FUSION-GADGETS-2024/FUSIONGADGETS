@@ -7,10 +7,12 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
-import { useCart } from "@/lib/providers/hybrid-provider";
+import { useAuth } from "@/lib/auth/index";
 
 export default function CartPage() {
-  const { state, isLoading, removeItem, updateQuantity } = useCart();
+  const { cart, loading, removeFromCart, updateCartQuantity } = useAuth();
+  const state = { items: cart, total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), count: cart.reduce((sum, item) => sum + item.quantity, 0) };
+  const isLoading = loading;
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch by only rendering cart content after mount
@@ -20,11 +22,11 @@ export default function CartPage() {
 
   const handleUpdateQuantity = (itemId: string, currentQuantity: number, delta: number) => {
     const newQuantity = Math.max(1, currentQuantity + delta);
-    updateQuantity(itemId, newQuantity);
+    updateCartQuantity(itemId, newQuantity);
   };
 
   const handleRemove = (itemId: string) => {
-    removeItem(itemId);
+    removeFromCart(itemId);
   };
 
   return (

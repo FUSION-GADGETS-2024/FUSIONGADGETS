@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearch } from '@/lib/search-context';
-import { useCart } from '@/lib/providers/hybrid-provider';
+import { useAuth } from '@/lib/auth/index';
 import { Product } from '@/lib/types';
 import { toast } from 'sonner';
 
@@ -15,7 +15,7 @@ interface SearchResultsProps {
 
 export function SearchResults({ products, className = '' }: SearchResultsProps) {
   const { searchQuery } = useSearch();
-  const { addItem } = useCart();
+  const { addToCart } = useAuth();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function SearchResults({ products, className = '' }: SearchResultsProps) 
   }, [searchQuery, products]);
 
   const handleAddToCart = (product: Product) => {
-    addItem({
+    addToCart({
       productId: product.id,
       name: product.name,
       price: product.price,

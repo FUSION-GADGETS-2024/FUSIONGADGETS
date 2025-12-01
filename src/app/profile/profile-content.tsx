@@ -6,30 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/lib/auth-context";
-import { useProfile, useUpdateProfile } from "@/lib/hooks/use-profile";
+import { useAuth } from "@/lib/auth/index";
 import { ProfileSkeleton } from "./profile-skeleton";
 import { toast } from "sonner";
 import { User, Loader2 } from "lucide-react";
 
 export function ProfileContent() {
-    const { user, loading: authLoading, updateProfile: updateAuthProfile } = useAuth();
+    const { user, profile, loading, updateProfile } = useAuth();
     const router = useRouter();
-    const { data: profile, isLoading, error, refetch } = useProfile();
-    const updateProfile = useUpdateProfile();
-
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
+    const [saving, setSaving] = useState(false);
 
-    // Redirect if not authenticated
     useEffect(() => {
-        if (!authLoading && !user) {
+        if (!loading && !user) {
             router.push('/login?returnUrl=/profile');
         }
-    }, [user, authLoading, router]);
+    }, [user, loading, router]);
 
-    // Update form when profile loads
     useEffect(() => {
         if (profile) {
             setName(profile.name || '');
@@ -38,17 +33,8 @@ export function ProfileContent() {
         }
     }, [profile]);
 
-    if (authLoading || isLoading) {
+    if (loading) {
         return <ProfileSkeleton />;
-    }
-
-    if (error) {
-        return (
-            <div className="max-w-2xl mx-auto text-center py-24">
-                <p className="text-base text-destructive mb-6">Failed to load profile</p>
-                <Button onClick={() => refetch()}>Retry</Button>
-            </div>
-        );
     }
 
     if (!user) {
@@ -61,21 +47,16 @@ export function ProfileContent() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSaving(true);
 
         try {
-            await updateProfile.mutateAsync({
-                name,
-                phone: phone || undefined,
-            });
-
-            if (updateAuthProfile) {
-                await updateAuthProfile({ name });
-            }
-
+            await updateProfile({ name, phone: phone || undefined });
             toast.success('Profile updated successfully!');
         } catch (error: any) {
             console.error('Error updating profile:', error);
-            toast.error(error.message || 'Failed to update profile');
+            toast.error('Failed to update profile');
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -90,15 +71,16 @@ export function ProfileContent() {
                         {profile?.name || user?.user_metadata?.name || 'User'}
                     </h1>
                     <p className="text-text-secondary">{profile?.email || user?.email}</p>
+                    {profile?.user_code && (
+                        <p className="text-xs text-text-tertiary">ID: {profile.user_code}</p>
+                    )}
                 </div>
             </div>
 
             <Card>
                 <CardHeader>
                     <CardTitle>Personal Information</CardTitle>
-                    <CardDescription>
-                        Update your account details
-                    </CardDescription>
+                    <CardDescription>Update your account details</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,9 +103,7 @@ export function ProfileContent() {
                                 disabled
                                 className="bg-muted cursor-not-allowed"
                             />
-                            <p className="text-xs text-muted-foreground">
-                                Email cannot be changed
-                            </p>
+                            <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="phone">Phone Number</Label>
@@ -135,8 +115,8 @@ export function ProfileContent() {
                                 placeholder="+91 98765 43210"
                             />
                         </div>
-                        <Button type="submit" disabled={updateProfile.isPending}>
-                            {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                        <Button type="submit" disabled={saving}>
+                            {saving ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </form>
                 </CardContent>

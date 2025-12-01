@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Heart, Check } from "lucide-react";
 import { Button } from "./ui/button";
-import { useCart, useWishlist } from "@/lib/providers/hybrid-provider";
+import { useAuth } from "@/lib/auth/index";
 import { toast } from "sonner";
 
 // Wishlist Button Wrapper - Client Component
 export function WishlistWrapper({ productId }: { productId: string }) {
-  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isInWishlist, toggleWishlist } = useAuth();
   const isWishlisted = isInWishlist(productId);
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
@@ -59,7 +59,7 @@ export function AddToCartWrapper({
   inStock: boolean;
 }) {
   const [isAdded, setIsAdded] = useState(false);
-  const { addItem } = useCart();
+  const { addToCart } = useAuth();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,7 +67,7 @@ export function AddToCartWrapper({
     
     if (!inStock || isAdded) return;
     
-    addItem({
+    addToCart({
       productId,
       name: productName,
       price: productPrice,
