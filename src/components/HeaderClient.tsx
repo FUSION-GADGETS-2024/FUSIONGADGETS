@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useAuth } from "@/lib/auth/index";
+import { useCart } from "@/lib/auth/cart-hooks";
 import { useSearch } from "@/lib/search-context";
 
 
@@ -34,7 +35,8 @@ export const HeaderClient = ({ cartCount: propCartCount, onSearchChange }: Heade
   const pathname = usePathname();
   const router = useRouter();
   const { searchQuery, setSearchQuery } = useSearch();
-  const { user, signOut, cartCount: authCartCount } = useAuth();
+  const { user, signOut } = useAuth();
+  const { count: authCartCount } = useCart();
   
   // Use cart context count if available, otherwise use prop
   const cartCount = propCartCount !== undefined ? propCartCount : authCartCount;

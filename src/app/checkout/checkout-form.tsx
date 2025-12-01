@@ -8,13 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useAuth } from "@/lib/auth/index";
+import { useCart } from "@/lib/auth/cart-hooks";
 import { toast } from "sonner";
 
 export function CheckoutForm() {
-  const { cart, loading, clearCart } = useAuth();
-  const state = { items: cart, total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), count: cart.reduce((sum, item) => sum + item.quantity, 0) };
-  const isLoading = loading;
+  const { items, total, count, clearCart, isLoading } = useCart();
+  const state = { items, total, count };
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -178,7 +177,7 @@ export function CheckoutForm() {
           
           <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
             {state.items.map((item) => (
-              <div key={item.id} className="flex gap-3">
+              <div key={item.productId} className="flex gap-3">
                 <div className="w-12 h-12 bg-surface rounded-lg overflow-hidden flex-shrink-0 relative">
                   <Image
                     src={item.image || '/placeholder.svg'}

@@ -85,9 +85,9 @@ export const LazyReviewCard = dynamic(
   }
 );
 
-// Lazy-loaded ProductCard component for non-critical sections
+// Lazy-loaded ProductCardServer component for non-critical sections
 export const LazyProductCard = dynamic(
-  () => import('./ProductCard').then(mod => ({ default: mod.ProductCard })),
+  () => import('./ProductCardServer').then(mod => ({ default: mod.ProductCardServer })),
   {
     ssr: true, // Keep SSR for SEO but lazy load for client-side navigation
     loading: () => (

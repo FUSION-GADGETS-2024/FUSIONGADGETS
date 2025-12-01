@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/WishlistButton";
-import { useAuth } from "@/lib/auth/index";
+import { useCart } from "@/lib/auth/cart-hooks";
 import { toast } from "sonner";
 import { Product } from "@/lib/types";
 
@@ -15,7 +15,7 @@ interface ProductDetailActionsProps {
 export function ProductDetailActions({ product }: ProductDetailActionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
-  const { addToCart } = useAuth();
+  const { addToCart } = useCart();
 
   const handleAddToCart = () => {
     setIsAdded(true);

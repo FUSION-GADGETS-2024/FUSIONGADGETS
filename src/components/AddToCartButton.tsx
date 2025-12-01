@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "./ui/button";
-import { useAuth } from "@/lib/auth/index";
+import { useCart } from "@/lib/auth/cart-hooks";
 import { toast } from "sonner";
 
 interface AddToCartButtonProps {
@@ -30,7 +30,7 @@ export function AddToCartButton({
   quantity = 1,
 }: AddToCartButtonProps) {
   const [isAdded, setIsAdded] = useState(false);
-  const { addToCart } = useAuth();
+  const { addToCart } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();

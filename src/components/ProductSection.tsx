@@ -1,4 +1,4 @@
-import { ProductCard } from "./ProductCard";
+import { ProductCardServer } from "./ProductCardServer";
 import { Button } from "./ui/button";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -7,11 +7,10 @@ import { Product } from "@/lib/types";
 interface ProductSectionProps {
   title: string;
   products: Product[];
-  onAddToCart: (product: Product) => void;
   showViewAll?: boolean;
 }
 
-export const ProductSection = ({ title, products, onAddToCart, showViewAll = false }: ProductSectionProps) => {
+export const ProductSection = ({ title, products, showViewAll = false }: ProductSectionProps) => {
   return (
     <section className="mb-24">
       <div className="flex items-center justify-between mb-8">
@@ -28,7 +27,7 @@ export const ProductSection = ({ title, products, onAddToCart, showViewAll = fal
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map(product => (
-          <ProductCard
+          <ProductCardServer
             key={product.id}
             id={product.id}
             name={product.name}
@@ -39,7 +38,6 @@ export const ProductSection = ({ title, products, onAddToCart, showViewAll = fal
             brand={product.brand}
             rating={product.rating}
             inStock={product.inStock}
-            onAddToCart={() => onAddToCart(product)}
           />
         ))}
       </div>

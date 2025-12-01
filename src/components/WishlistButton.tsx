@@ -2,7 +2,7 @@
 
 import { Heart } from "lucide-react";
 import { Button } from "./ui/button";
-import { useAuth } from "@/lib/auth/index";
+import { useWishlist } from "@/lib/auth/wishlist-hooks";
 import { toast } from "sonner";
 
 interface WishlistButtonProps {
@@ -11,7 +11,7 @@ interface WishlistButtonProps {
 }
 
 export function WishlistButton({ productId, className = "" }: WishlistButtonProps) {
-  const { isInWishlist, toggleWishlist } = useAuth();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const isWishlisted = isInWishlist(productId);
 
   const handleToggleWishlist = (e: React.MouseEvent) => {

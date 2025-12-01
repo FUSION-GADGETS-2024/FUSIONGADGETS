@@ -7,12 +7,11 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
-import { useAuth } from "@/lib/auth/index";
+import { useCart } from "@/lib/auth/cart-hooks";
 
 export default function CartPage() {
-  const { cart, loading, removeFromCart, updateCartQuantity } = useAuth();
-  const state = { items: cart, total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), count: cart.reduce((sum, item) => sum + item.quantity, 0) };
-  const isLoading = loading;
+  const { items, total, count, removeFromCart, updateQuantity, isLoading } = useCart();
+  const state = { items, total, count };
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch by only rendering cart content after mount
@@ -20,13 +19,13 @@ export default function CartPage() {
     setMounted(true);
   }, []);
 
-  const handleUpdateQuantity = (itemId: string, currentQuantity: number, delta: number) => {
+  const handleUpdateQuantity = (productId: string, currentQuantity: number, delta: number) => {
     const newQuantity = Math.max(1, currentQuantity + delta);
-    updateCartQuantity(itemId, newQuantity);
+    updateQuantity(productId, newQuantity);
   };
 
-  const handleRemove = (itemId: string) => {
-    removeFromCart(itemId);
+  const handleRemove = (productId: string) => {
+    removeFromCart(productId);
   };
 
   return (
@@ -74,7 +73,7 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               {state.items.map((item) => (
-                <div key={item.id} className="bg-card border border-border rounded-xl p-6 flex gap-6">
+                <div key={item.productId} className="bg-card border border-border rounded-xl p-6 flex gap-6">
                   <div className="w-24 h-24 bg-surface rounded-lg overflow-hidden flex-shrink-0 relative">
                     <Image
                       src={item.image || '/placeholder.svg'}
@@ -101,7 +100,7 @@ export default function CartPage() {
                     <div className="flex items-center gap-4 mt-4">
                       <div className="flex items-center border border-border rounded-lg">
                         <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity, -1)}
+                          onClick={() => handleUpdateQuantity(item.productId, item.quantity, -1)}
                           className="px-3 h-8 text-foreground hover:bg-surface transition-colors duration-150"
                         >
                           <Minus className="h-4 w-4" />
@@ -110,7 +109,7 @@ export default function CartPage() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity, 1)}
+                          onClick={() => handleUpdateQuantity(item.productId, item.quantity, 1)}
                           className="px-3 h-8 text-foreground hover:bg-surface transition-colors duration-150"
                         >
                           <Plus className="h-4 w-4" />
@@ -118,7 +117,7 @@ export default function CartPage() {
                       </div>
 
                       <button
-                        onClick={() => handleRemove(item.id)}
+                        onClick={() => handleRemove(item.productId)}
                         className="text-text-secondary hover:text-destructive transition-colors duration-150"
                       >
                         <Trash2 className="h-5 w-5" />
