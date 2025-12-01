@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "./ui/button";
-import { useCart } from "@/lib/cart-context";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/lib/providers/hybrid-provider";
+import { toast } from "sonner";
 
 interface AddToCartButtonProps {
   productId: string;
@@ -15,9 +15,9 @@ interface AddToCartButtonProps {
   inStock: boolean;
   className?: string;
   fullWidth?: boolean;
+  quantity?: number;
 }
 
-// Client Component - Add to Cart Button
 export function AddToCartButton({ 
   productId, 
   productName, 
@@ -26,30 +26,29 @@ export function AddToCartButton({
   productBrand,
   inStock,
   className = "",
-  fullWidth = false
+  fullWidth = false,
+  quantity = 1,
 }: AddToCartButtonProps) {
   const [isAdded, setIsAdded] = useState(false);
   const { addItem } = useCart();
-  const { toast } = useToast();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (!inStock) return;
+    if (!inStock || isAdded) return;
     
-    setIsAdded(true);
     addItem({
-      id: productId,
+      productId,
       name: productName,
       price: productPrice,
       image: productImage,
       brand: productBrand,
+      quantity,
     });
     
-    toast({
-      description: "Product added to cart",
-    });
+    setIsAdded(true);
+    toast.success(`${quantity > 1 ? `${quantity} items` : 'Product'} added to cart`);
     
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -65,6 +64,8 @@ export function AddToCartButton({
           <Check className="h-3.5 w-3.5" />
           Added
         </span>
+      ) : !inStock ? (
+        'Out of Stock'
       ) : (
         'Add to Cart'
       )}

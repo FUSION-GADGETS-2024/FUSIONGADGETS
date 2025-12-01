@@ -162,6 +162,10 @@ export async function getFeaturedProducts(limit: number = 10): Promise<Product[]
     return [];
   }
 
+  if (!products || products.length === 0) {
+    return [];
+  }
+
   return products.map(product => 
     transformProduct(
       product,
@@ -196,6 +200,10 @@ export async function getNewArrivals(limit: number = 10): Promise<Product[]> {
     return [];
   }
 
+  if (!products || products.length === 0) {
+    return [];
+  }
+
   return products.map(product => 
     transformProduct(
       product,
@@ -227,6 +235,10 @@ export async function getHotDeals(limit: number = 10): Promise<Product[]> {
 
   if (error) {
     console.error('Error fetching hot deals:', error);
+    return [];
+  }
+
+  if (!products || products.length === 0) {
     return [];
   }
 

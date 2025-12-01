@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
-import { AddToCartButton } from "./AddToCartButton";
-import { WishlistButton } from "./WishlistButton";
+import { WishlistWrapper, AddToCartWrapper } from "./ProductCardActions";
 
 interface ProductCardServerProps {
   id: string;
@@ -16,7 +15,7 @@ interface ProductCardServerProps {
   inStock: boolean;
 }
 
-// Server Component - Product Card (only buttons are client components)
+// Server Component - Product Card (renders static content, delegates interactive parts to client)
 export function ProductCardServer({ 
   id, 
   name, 
@@ -39,10 +38,8 @@ export function ProductCardServer({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          {/* Wishlist Button - Client Component */}
-          <div className="absolute top-2 right-2 z-10">
-            <WishlistButton productId={id} />
-          </div>
+          {/* Client-side wishlist button */}
+          <WishlistWrapper productId={id} />
         </div>
       </Link>
 
@@ -89,8 +86,8 @@ export function ProductCardServer({
             {inStock ? 'In Stock' : 'Out of Stock'}
           </span>
 
-          {/* Add to Cart Button - Client Component */}
-          <AddToCartButton 
+          {/* Client-side add to cart button */}
+          <AddToCartWrapper
             productId={id}
             productName={name}
             productPrice={price}

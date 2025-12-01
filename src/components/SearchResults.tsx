@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ProductCard } from './ProductCard';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useSearch } from '@/lib/search-context';
-import { useCart } from '@/lib/cart-context';
-import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/lib/providers/hybrid-provider';
 import { Product } from '@/lib/types';
+import { toast } from 'sonner';
 
 interface SearchResultsProps {
   products: Product[];
@@ -15,7 +16,6 @@ interface SearchResultsProps {
 export function SearchResults({ products, className = '' }: SearchResultsProps) {
   const { searchQuery } = useSearch();
   const { addItem } = useCart();
-  const { toast } = useToast();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -35,16 +35,14 @@ export function SearchResults({ products, className = '' }: SearchResultsProps) 
 
   const handleAddToCart = (product: Product) => {
     addItem({
-      id: product.id,
+      productId: product.id,
       name: product.name,
       price: product.price,
       image: product.images[0]?.url || '/placeholder.svg',
       brand: product.brand,
     });
     
-    toast({
-      description: "Product added to cart",
-    });
+    toast.success("Product added to cart");
   };
 
   if (!searchQuery.trim()) {
@@ -60,29 +58,44 @@ export function SearchResults({ products, className = '' }: SearchResultsProps) 
           </h3>
           <div className="space-y-3">
             {filteredProducts.slice(0, 5).map(product => (
-              <div key={product.id} className="flex items-center gap-3 p-2 hover:bg-background/50 rounded-md">
-                <img 
-                  src={product.images[0]?.url || '/placeholder.svg'} 
-                  alt={product.name}
-                  className="w-12 h-12 object-cover rounded-md"
-                />
+              <div key={product.id} className="flex items-center gap-3 p-2 hover:bg-surface rounded-md">
+                <Link href={`/products/${product.id}`} className="flex-shrink-0">
+                  <div className="w-12 h-12 relative rounded-md overflow-hidden">
+                    <Image 
+                      src={product.images[0]?.url || '/placeholder.svg'} 
+                      alt={product.name}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  </div>
+                </Link>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+                  <Link href={`/products/${product.id}`}>
+                    <p className="text-sm font-medium text-foreground truncate hover:text-text-secondary">
+                      {product.name}
+                    </p>
+                  </Link>
                   <p className="text-xs text-text-secondary">{product.category}</p>
-                  <p className="text-sm font-semibold text-foreground">${product.price}</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    ₹{product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleAddToCart(product)}
-                  className="text-xs bg-foreground text-background px-2 py-1 rounded hover:bg-foreground/90 transition-colors"
+                  className="text-xs bg-foreground text-background px-3 py-1.5 rounded-md hover:bg-foreground/90 transition-colors"
                 >
-                  Add to Cart
+                  Add
                 </button>
               </div>
             ))}
             {filteredProducts.length > 5 && (
-              <p className="text-xs text-text-secondary text-center py-2">
-                And {filteredProducts.length - 5} more results...
-              </p>
+              <Link 
+                href={`/search?q=${encodeURIComponent(searchQuery)}`}
+                className="block text-xs text-text-secondary text-center py-2 hover:text-foreground"
+              >
+                View all {filteredProducts.length} results →
+              </Link>
             )}
           </div>
         </div>

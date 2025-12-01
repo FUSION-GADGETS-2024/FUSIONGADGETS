@@ -117,9 +117,6 @@ export const dynamicImports = {
   // Lazy load review components for product details
   ReviewCard: () => import('@/components/ReviewCard').then(mod => ({ default: mod.ReviewCard })),
   
-  // Lazy load cart-related components
-  CartProvider: () => import('@/lib/cart-context').then(mod => ({ default: mod.CartProvider })),
-  
   // Lazy load authentication components
   AuthComponents: () => import('@/lib/auth').then(mod => ({ default: mod.auth })),
 } as const;

@@ -1,16 +1,22 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
-import { useCart } from "@/lib/cart-context";
+import { useCart } from "@/lib/providers/hybrid-provider";
 
-// Cart Page - Full Client Component (data from localStorage/Context)
 export default function CartPage() {
-  const { state: cartState, removeItem, updateQuantity } = useCart();
+  const { state, isLoading, removeItem, updateQuantity } = useCart();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering cart content after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleUpdateQuantity = (itemId: string, currentQuantity: number, delta: number) => {
     const newQuantity = Math.max(1, currentQuantity + delta);
@@ -28,7 +34,33 @@ export default function CartPage() {
       <main className="container mx-auto px-8 pt-24 pb-24">
         <h1 className="text-2xl font-semibold text-foreground mb-8">Shopping Cart</h1>
 
-        {cartState.items.length === 0 ? (
+        {!mounted || isLoading ? (
+          // Loading skeleton
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-card border border-border rounded-xl p-6 flex gap-6 animate-pulse">
+                  <div className="w-24 h-24 bg-surface rounded-lg" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-surface rounded w-3/4" />
+                    <div className="h-5 bg-surface rounded w-1/4" />
+                    <div className="h-8 bg-surface rounded w-32" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="lg:col-span-1">
+              <div className="bg-card border border-border rounded-xl p-6 animate-pulse">
+                <div className="h-5 bg-surface rounded w-1/2 mb-6" />
+                <div className="space-y-4">
+                  <div className="h-4 bg-surface rounded" />
+                  <div className="h-4 bg-surface rounded" />
+                  <div className="h-6 bg-surface rounded" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : state.items.length === 0 ? (
           <div className="text-center py-24">
             <ShoppingBag className="h-16 w-16 text-text-tertiary mx-auto mb-4" />
             <p className="text-base text-text-secondary mb-6">Your cart is empty</p>
@@ -38,13 +70,12 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {cartState.items.map((item) => (
+              {state.items.map((item) => (
                 <div key={item.id} className="bg-card border border-border rounded-xl p-6 flex gap-6">
                   <div className="w-24 h-24 bg-surface rounded-lg overflow-hidden flex-shrink-0 relative">
                     <Image
-                      src={item.image}
+                      src={item.image || '/placeholder.svg'}
                       alt={item.name}
                       fill
                       sizes="96px"
@@ -54,7 +85,9 @@ export default function CartPage() {
 
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="text-xs text-text-tertiary mb-1">{item.brand}</p>
+                      {item.brand && (
+                        <p className="text-xs text-text-tertiary mb-1">{item.brand}</p>
+                      )}
                       <h3 className="text-base font-semibold text-foreground mb-1">
                         {item.name}
                       </h3>
@@ -94,16 +127,15 @@ export default function CartPage() {
               ))}
             </div>
 
-            {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-card border border-border rounded-xl p-6 sticky top-24">
                 <h2 className="text-base font-semibold text-foreground mb-6">Order Summary</h2>
 
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-text-secondary">Subtotal ({cartState.count} items)</span>
+                    <span className="text-text-secondary">Subtotal ({state.count} items)</span>
                     <span className="text-foreground font-medium">
-                      ₹{cartState.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      ₹{state.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -114,7 +146,7 @@ export default function CartPage() {
                     <div className="flex justify-between">
                       <span className="text-base font-semibold text-foreground">Total</span>
                       <span className="text-lg font-semibold text-foreground">
-                        ₹{cartState.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        ₹{state.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                   </div>

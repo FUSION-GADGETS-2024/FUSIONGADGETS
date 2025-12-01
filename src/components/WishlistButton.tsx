@@ -1,29 +1,30 @@
 'use client';
 
-import { useState } from "react";
 import { Heart } from "lucide-react";
 import { Button } from "./ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useWishlist } from "@/lib/providers/hybrid-provider";
+import { toast } from "sonner";
 
 interface WishlistButtonProps {
   productId: string;
   className?: string;
 }
 
-// Client Component - Wishlist Button
 export function WishlistButton({ productId, className = "" }: WishlistButtonProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const { toast } = useToast();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(productId);
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    setIsWishlisted(!isWishlisted);
+    const nowInWishlist = toggleWishlist(productId);
     
-    toast({
-      description: isWishlisted ? "Removed from wishlist" : "Added to wishlist",
-    });
+    if (nowInWishlist) {
+      toast.success("Added to wishlist");
+    } else {
+      toast.success("Removed from wishlist");
+    }
   };
 
   return (

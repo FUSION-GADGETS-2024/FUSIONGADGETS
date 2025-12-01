@@ -4,38 +4,32 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/WishlistButton";
-import { useCart } from "@/lib/cart-context";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/lib/providers/hybrid-provider";
+import { toast } from "sonner";
 import { Product } from "@/lib/types";
 
 interface ProductDetailActionsProps {
   product: Product;
 }
 
-// Client Component - Product Detail Actions (Add to Cart, Wishlist, Quantity)
 export function ProductDetailActions({ product }: ProductDetailActionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const { addItem } = useCart();
-  const { toast } = useToast();
 
   const handleAddToCart = () => {
     setIsAdded(true);
     
-    // Add the specified quantity to cart
-    for (let i = 0; i < quantity; i++) {
-      addItem({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.images[0]?.url || '/placeholder.svg',
-        brand: product.brand,
-      });
-    }
-    
-    toast({
-      description: `${quantity} item(s) added to cart`,
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0]?.url || '/placeholder.svg',
+      brand: product.brand,
+      quantity,
     });
+    
+    toast.success(`${quantity} item(s) added to cart`);
     
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -43,7 +37,6 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
   return (
     <div className="border-t border-border pt-6 space-y-4">
       <div className="flex items-center gap-4">
-        {/* Quantity Selector */}
         <div className="flex items-center border border-border rounded-lg">
           <button 
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -62,7 +55,6 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
           </button>
         </div>
         
-        {/* Add to Cart Button */}
         <Button
           onClick={handleAddToCart}
           disabled={!product.inStock || isAdded}
@@ -80,7 +72,6 @@ export function ProductDetailActions({ product }: ProductDetailActionsProps) {
           )}
         </Button>
         
-        {/* Wishlist Button */}
         <WishlistButton productId={product.id} className="h-10 w-10" />
       </div>
     </div>

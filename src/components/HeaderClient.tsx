@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useAuth } from "@/lib/auth-context";
-import { useCart } from "@/lib/cart-context";
+import { useCart } from "@/lib/providers/hybrid-provider";
 import { useSearch } from "@/lib/search-context";
 
 

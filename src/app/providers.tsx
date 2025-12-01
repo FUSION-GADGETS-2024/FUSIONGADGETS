@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { CartProvider } from "@/lib/cart-context";
+import { HybridProvider } from "@/lib/providers/hybrid-provider";
 import { SearchProvider } from "@/lib/search-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { useState, useEffect } from "react";
@@ -15,12 +15,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        // Optimize query defaults for performance
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
-          // Don't retry on 4xx errors
           if (error && 'status' in error && typeof error.status === 'number') {
             return error.status >= 500 && failureCount < 3;
           }
@@ -31,7 +29,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }));
 
   useEffect(() => {
-    // Initialize performance optimizations on client-side
     initializePerformanceOptimizations();
   }, []);
 
@@ -39,14 +36,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <CartProvider>
+          <HybridProvider>
             <SearchProvider>
               {children}
               <Toaster />
               <Sonner />
               <PerformanceMonitor />
             </SearchProvider>
-          </CartProvider>
+          </HybridProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

@@ -10,11 +10,12 @@ import { useAuth } from "@/lib/auth-context";
 import { useProfile, useUpdateProfile } from "@/lib/hooks/use-profile";
 import { ProfileSkeleton } from "./profile-skeleton";
 import { toast } from "sonner";
+import { User, Loader2 } from "lucide-react";
 
 export function ProfileContent() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, updateProfile: updateAuthProfile } = useAuth();
     const router = useRouter();
-    const { data: profile, isLoading, error } = useProfile();
+    const { data: profile, isLoading, error, refetch } = useProfile();
     const updateProfile = useUpdateProfile();
 
     const [name, setName] = useState("");
@@ -45,13 +46,17 @@ export function ProfileContent() {
         return (
             <div className="max-w-2xl mx-auto text-center py-24">
                 <p className="text-base text-destructive mb-6">Failed to load profile</p>
-                <Button onClick={() => window.location.reload()}>Retry</Button>
+                <Button onClick={() => refetch()}>Retry</Button>
             </div>
         );
     }
 
-    if (!user || !profile) {
-        return null;
+    if (!user) {
+        return (
+            <div className="max-w-2xl mx-auto text-center py-24">
+                <Loader2 className="h-8 w-8 animate-spin text-text-tertiary mx-auto" />
+            </div>
+        );
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -63,6 +68,10 @@ export function ProfileContent() {
                 phone: phone || undefined,
             });
 
+            if (updateAuthProfile) {
+                await updateAuthProfile({ name });
+            }
+
             toast.success('Profile updated successfully!');
         } catch (error: any) {
             console.error('Error updating profile:', error);
@@ -72,7 +81,17 @@ export function ProfileContent() {
 
     return (
         <div className="max-w-2xl mx-auto">
-            <h1 className="text-3xl font-semibold mb-8">Profile</h1>
+            <div className="flex items-center gap-4 mb-8">
+                <div className="h-16 w-16 rounded-full bg-surface flex items-center justify-center">
+                    <User className="h-8 w-8 text-text-secondary" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-semibold text-foreground">
+                        {profile?.name || user?.user_metadata?.name || 'User'}
+                    </h1>
+                    <p className="text-text-secondary">{profile?.email || user?.email}</p>
+                </div>
+            </div>
 
             <Card>
                 <CardHeader>
@@ -113,7 +132,7 @@ export function ProfileContent() {
                                 type="tel"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
-                                placeholder="Enter your phone number"
+                                placeholder="+91 98765 43210"
                             />
                         </div>
                         <Button type="submit" disabled={updateProfile.isPending}>

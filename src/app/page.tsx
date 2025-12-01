@@ -8,7 +8,7 @@ import { Hero } from "@/components/Hero";
 import { ProductGrid } from "@/components/ProductGrid";
 import { ProductRowSkeleton } from "@/components/ProductRowSkeleton";
 
-// ISR - revalidate every 10 minutes as per architecture requirements
+// ISR - revalidate every 10 minutes (600 seconds)
 export const revalidate = 600;
 
 export const metadata: Metadata = {

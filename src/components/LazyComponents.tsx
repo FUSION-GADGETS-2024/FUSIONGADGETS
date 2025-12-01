@@ -103,14 +103,7 @@ export const LazyProductCard = dynamic(
   }
 );
 
-// Lazy-loaded cart-related components
-export const LazyCartProvider = dynamic(
-  () => import('@/lib/cart-context').then(mod => ({ default: mod.CartProvider })),
-  {
-    ssr: false,
-    loading: () => <LoadingSpinner />,
-  }
-);
+
 
 // Lazy-loaded search provider
 export const LazySearchProvider = dynamic(

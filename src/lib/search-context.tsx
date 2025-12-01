@@ -26,8 +26,15 @@ export function SearchProvider({ children }: { children: ReactNode }) {
 
 export function useSearch() {
   const context = useContext(SearchContext);
+  
+  // Return default values if context is not available (SSR or outside provider)
   if (context === undefined) {
-    throw new Error('useSearch must be used within a SearchProvider');
+    return {
+      searchQuery: '',
+      setSearchQuery: () => {},
+      clearSearch: () => {},
+    };
   }
+  
   return context;
 }

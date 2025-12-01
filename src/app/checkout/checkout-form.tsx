@@ -1,55 +1,96 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useToast } from "@/hooks/use-toast";
-import { useCart } from "@/lib/cart-context";
+import { useCart } from "@/lib/providers/hybrid-provider";
+import { toast } from "sonner";
 
-// Client Component - Checkout Form (payment UI, forms, address management)
 export function CheckoutForm() {
-  const { state: cartState, clearCart } = useCart();
-  const { toast } = useToast();
+  const { state, isLoading, clearCart } = useCart();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     clearCart();
-    toast({
-      title: "Order placed successfully!",
+    
+    toast.success("Order placed successfully!", {
       description: "You will receive a confirmation email shortly.",
     });
+    
     setTimeout(() => router.push("/"), 2000);
   };
 
-  if (cartState.items.length === 0) {
+  if (!mounted || isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-6 animate-pulse">
+              <div className="h-5 bg-surface rounded w-1/3 mb-6" />
+              <div className="space-y-4">
+                <div className="h-10 bg-surface rounded" />
+                <div className="h-10 bg-surface rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="lg:col-span-1">
+          <div className="bg-card border border-border rounded-xl p-6 animate-pulse">
+            <div className="h-5 bg-surface rounded w-1/2 mb-6" />
+            <div className="space-y-4">
+              <div className="h-4 bg-surface rounded" />
+              <div className="h-4 bg-surface rounded" />
+              <div className="h-6 bg-surface rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (state.items.length === 0) {
     return (
       <div className="text-center py-16">
         <p className="text-text-secondary mb-4">Your cart is empty</p>
-        <Button onClick={() => router.push('/')}>Continue Shopping</Button>
+        <Link href="/">
+          <Button>Continue Shopping</Button>
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Checkout Form */}
       <div className="lg:col-span-2">
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Contact Information */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="text-base font-semibold text-foreground mb-6">Contact Information</h2>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" className="mt-2" required />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="you@example.com" 
+                  className="mt-2" 
+                  required 
+                />
               </div>
             </div>
           </div>
 
-          {/* Shipping Address */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="text-base font-semibold text-foreground mb-6">Shipping Address</h2>
             <div className="space-y-4">
@@ -88,7 +129,6 @@ export function CheckoutForm() {
             </div>
           </div>
 
-          {/* Payment Method */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="text-base font-semibold text-foreground mb-6">Payment Method</h2>
             <RadioGroup defaultValue="card">
@@ -130,20 +170,20 @@ export function CheckoutForm() {
         </form>
       </div>
 
-      {/* Order Summary - Client rendered from cart context */}
       <div className="lg:col-span-1">
         <div className="bg-card border border-border rounded-xl p-6 sticky top-24">
           <h2 className="text-base font-semibold text-foreground mb-6">Order Summary</h2>
           
-          {/* Cart Items */}
           <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
-            {cartState.items.map((item) => (
+            {state.items.map((item) => (
               <div key={item.id} className="flex gap-3">
-                <div className="w-12 h-12 bg-surface rounded-lg overflow-hidden flex-shrink-0">
-                  <img
-                    src={item.image}
+                <div className="w-12 h-12 bg-surface rounded-lg overflow-hidden flex-shrink-0 relative">
+                  <Image
+                    src={item.image || '/placeholder.svg'}
                     alt={item.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="48px"
+                    className="object-cover"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -161,7 +201,7 @@ export function CheckoutForm() {
             <div className="flex justify-between text-sm">
               <span className="text-text-secondary">Subtotal</span>
               <span className="text-foreground font-medium">
-                ₹{cartState.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                ₹{state.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
             </div>
             <div className="flex justify-between text-sm">
@@ -171,14 +211,14 @@ export function CheckoutForm() {
             <div className="flex justify-between text-sm">
               <span className="text-text-secondary">Tax (18% GST)</span>
               <span className="text-foreground font-medium">
-                ₹{(cartState.total * 0.18).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                ₹{(state.total * 0.18).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
             </div>
             <div className="border-t border-border pt-4">
               <div className="flex justify-between">
                 <span className="text-base font-semibold text-foreground">Total</span>
                 <span className="text-lg font-semibold text-foreground">
-                  ₹{(cartState.total * 1.18).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  ₹{(state.total * 1.18).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
